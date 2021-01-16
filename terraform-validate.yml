@@ -1,0 +1,31 @@
+parameters:
+  tarraformVersion: ''
+  servicePrinciple: ''
+  resourceGroup: ''
+  storageAccountName: ''
+  storageContainerName: ''
+  storageKey: ''
+
+jobs:
+    - job: validate
+    continueOnError: false
+    steps:
+    - task: TerraformInstaller@0
+        displayName: 'install'
+        inputs:
+        terraformVersion: ${{ parameters.terraformVersion }}
+    - task: TerraformTaskV1@0
+        displayName: 'init'
+        inputs:
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: ${{ parameters.servicePrinciple }}
+        backendAzureRmResourceGroupName: ${{ parameters.resourceGroup }}
+        backendAzureRmStorageAccountName: ${{ parameters.storageAccountName }}
+        backendAzureRmContainerName: ${{ parameters.storageContainerName }}
+        backendAzureRmKey: ${{ parameters.storageKey }}
+    - task: TerraformTaskV1@0
+        displayName: 'validate'
+        inputs:
+        provider: 'azurerm'
+        command: 'validate'

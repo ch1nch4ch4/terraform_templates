@@ -1,0 +1,44 @@
+parameters:
+  tarraformVersion: ''
+  servicePrinciple: ''
+  resourceGroup: ''
+  storageAccountName: ''
+  storageContainerName: ''
+  storageKey: ''
+  deployEnv: ''
+
+  jobs:
+      - deployment: deploy_terraform
+        continueOnError: false
+        environment: ${{ parameters.deployEnv }}
+        strategy:
+         runOnce:
+          deploy:
+           steps:
+            - checkout: self
+            - task: TerraformInstaller@0
+              displayName: 'install'
+              inputs:
+                terraformVersion: ${{ parameters.terraformVersion }}
+            - task: TerraformTaskV1@0
+              displayName: 'init'
+              inputs:
+                provider: 'azurerm'
+                command: 'init'
+                backendServiceArm: ${{ parameters.servicePrinciple }}
+                backendAzureRmResourceGroupName: ${{ parameters.resourceGroup }}
+                backendAzureRmStorageAccountName: ${{ parameters.storageAccountName }}
+                backendAzureRmContainerName: ${{ parameters.storageContainerName }}
+                backendAzureRmKey: ${{ parameters.storageKey }}
+            - task: TerraformTaskV1@0
+              displayName: 'plan'
+              inputs:
+                provider: 'azurerm'
+                command: 'plan'
+                environmentServiceNameAzureRM: ${{ parameters.servicePrinciple }}
+            - task: TerraformTaskV1@0
+              displayName: 'apply'
+              inputs:
+                provider: 'azurerm'
+                command: 'apply'
+                environmentServiceNameAzureRM: ${{ parameters.servicePrinciple }}
